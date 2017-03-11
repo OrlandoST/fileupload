@@ -571,7 +571,7 @@ include('header.php');
 					 */
 					$conditions = array(
 										'select_all'		=> ( $current_level != '0' || CLIENTS_CAN_DELETE_OWN_FILES == '1' ) ? true : false,
-										'is_not_client'		=> ( $current_level != '0' ) ? true : false,
+										'is_not_client'		=> ( 1 ) ? true : false,
 										'total_downloads'	=> ( $current_level != '0' && !isset( $search_on ) ) ? true : false,
 										'is_search_on'		=> ( isset( $search_on ) ) ? true : false,
 									);

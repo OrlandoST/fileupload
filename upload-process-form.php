@@ -311,7 +311,7 @@ while( $row = $statement->fetch() ) {
 						<td><?php echo html_output($uploaded['description']); ?></td>
 						<td><?php echo html_output($uploaded['file']); ?></td>
 						<?php
-							if ($current_level != 0) {
+							if (1) {
 						?>
 								<td class="<?php echo (!empty($uploaded['hidden'])) ? 'file_status_hidden' : 'file_status_visible'; ?>">
 

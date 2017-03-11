@@ -213,9 +213,9 @@ class PSend_Upload_File
 				 * If a client is editing a file, the public settings should
 				 * not be reset.
 				 */
-				if ( CURRENT_USER_LEVEL == 0 ) {
+				/*if ( CURRENT_USER_LEVEL == 0 ) {
 					$this->is_public = $row["public_allow"];
-				}
+				}*/
 			}
 			$this->statement = $this->dbh->prepare("UPDATE " . TABLE_FILES . " SET
 												filename = :title,

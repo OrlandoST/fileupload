@@ -190,15 +190,15 @@ $current_level = get_current_user_level();
 							$send_notifications = false;
 						}
 						
+						if (!empty($file['expires'])) {
+							$add_arguments['expires'] = '1';
+						}
+
+						if (!empty($file['public'])) {
+							$add_arguments['public'] = '1';
+						}
+						
 						if ($current_level != 0) {
-
-							if (!empty($file['expires'])) {
-								$add_arguments['expires'] = '1';
-							}
-
-							if (!empty($file['public'])) {
-								$add_arguments['public'] = '1';
-							}
 
 							if (!empty($file['assignments'])) {
 								/**
@@ -268,6 +268,7 @@ $current_level = get_current_user_level();
 						/**
 						 * 1- Add the file to the database
 						 */
+						 var_dump($add_arguments);
 						$process_file = $this_upload->upload_add_to_database($add_arguments);
 						if($process_file['database'] == true) {
 							$add_arguments['new_file_id'] = $process_file['new_file_id'];
@@ -419,7 +420,7 @@ $current_level = get_current_user_level();
 			
 															<?php
 																/** The following options are available to users only */
-																if ($global_level != 0) {
+																if (1) {
 															?>
 															<div class="divider"></div>
 			

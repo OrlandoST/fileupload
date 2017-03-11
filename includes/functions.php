@@ -521,8 +521,7 @@ function default_footer_info($logged = true)
 		$add_user_data_user = $data['user'];
 	}
 	
-	$sql_distinct_files = $dbh->prepare("SELECT SUM(size) AS volume FROM " . TABLE_FILES. " WHERE uploader= :username");
-	$sql_distinct_files->bindParam(':username', $add_user_data_user);
+	$sql_distinct_files = $dbh->prepare("SELECT SUM(size) AS volume FROM " . TABLE_FILES);
 	$sql_distinct_files->execute();
 	$sql_distinct_files->setFetchMode(PDO::FETCH_ASSOC);
 	$file_size = 0;		
