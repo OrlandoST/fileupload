@@ -62,7 +62,6 @@ while( $row = $statement->fetch() ) {
 
 $files_to_get	= implode( ',', array_unique( $get_file_info) );
 $clients_to_get	= implode( ',', array_unique( $get_client_info) );
-
 /**
  * Continue if there are notifications to be sent.
  */
@@ -81,7 +80,6 @@ if (!empty($found_notifications)) {
 									'description'	=> $row['description']
 								);
 	}
-	
 	/**
 	 * Get the information of each client
 	 */
@@ -110,6 +108,7 @@ if (!empty($found_notifications)) {
 	 */
 	$creators = implode( ',', $creators);
 	if (!empty($creators)) {
+		
 		$statement = $dbh->prepare("SELECT id, name, user, email, active FROM " . TABLE_USERS . " WHERE FIND_IN_SET(user, :users)");
 		$statement->bindParam(':users', $creators);
 		$statement->execute();
@@ -125,7 +124,6 @@ if (!empty($found_notifications)) {
 			$mail_by_user[$row['user']] = $row['email'];
 		}
 	}
-	
 	/**
 	 * Prepare the list of clients and admins that will be
 	 * notified, adding to each one the corresponding files.
@@ -214,7 +212,7 @@ if (!empty($found_notifications)) {
 		foreach ($notes_to_admin as $mail_username => $admin_files) {
 			
 			/** Check if the admin is active */
-			if ($creators_data[$mail_username]['active'] == '1') {
+			if (isset($creators_data[$mail_username]) && $creators_data[$mail_username]['active'] == '1') {
 				/** Reset the files list UL contents */
 				$files_list = '';
 				foreach ($admin_files as $client_uploader => $mail_files) {
