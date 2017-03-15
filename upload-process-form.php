@@ -87,6 +87,7 @@ $users = array();
 $statement = $dbh->prepare("SELECT id, name, level FROM " . TABLE_USERS . " ORDER BY name ASC");
 $statement->execute();
 $statement->setFetchMode(PDO::FETCH_ASSOC);
+
 while( $row = $statement->fetch() ) {
 	$users[$row["id"]] = $row["name"];
 	if ($row["level"] == '0') {
@@ -203,8 +204,13 @@ while( $row = $statement->fetch() ) {
 							$add_arguments['assign_to'] = array('c'.$client_my_id);
 							$add_arguments['hidden'] = '0';
 							$add_arguments['uploader_type'] = 'client';
-							$add_arguments['expires'] = '0';
-							$add_arguments['public'] = '0';
+							if (!empty($file['expires'])) {
+								$add_arguments['expires'] = '1';
+								$add_arguments['expiry_date'] = $file['expiry_date'];
+							}
+							if (!empty($file['public'])) {
+								$add_arguments['public'] = '1';
+							}
 						}
 						else {
 							$add_arguments['uploader_type'] = 'user';
@@ -290,15 +296,16 @@ while( $row = $statement->fetch() ) {
 					<th data-sort-initial="true"><?php _e('Title','cftp_admin'); ?></th>
 					<th data-hide="phone"><?php _e('Description','cftp_admin'); ?></th>
 					<th data-hide="phone"><?php _e('File Name','cftp_admin'); ?></th>
+					<th data-hide="phone"><?php _e("Status",'cftp_admin'); ?></th>
 					<?php
 						if ($current_level != 0) {
 					?>
-							<th data-hide="phone"><?php _e("Status",'cftp_admin'); ?></th>
-							<th data-hide="phone"><?php _e('Assignations','cftp_admin'); ?></th>
-							<th data-hide="phone"><?php _e('Public','cftp_admin'); ?></th>
+
+						<th data-hide="phone"><?php _e('Assignations','cftp_admin'); ?></th>
 					<?php
 						}
 					?>
+					<th data-hide="phone"><?php _e('Public','cftp_admin'); ?></th>
 					<th data-hide="phone" data-sort-ignore="true"><?php _e("Actions",'cftp_admin'); ?></th>
 				</tr>
 			</thead>
@@ -310,26 +317,30 @@ while( $row = $statement->fetch() ) {
 						<td><?php echo html_output($uploaded['name']); ?></td>
 						<td><?php echo html_output($uploaded['description']); ?></td>
 						<td><?php echo html_output($uploaded['file']); ?></td>
-						<?php
-							if (1) {
-						?>
-								<td class="<?php echo (!empty($uploaded['hidden'])) ? 'file_status_hidden' : 'file_status_visible'; ?>">
+						<td class="<?php echo (!empty($uploaded['hidden'])) ? 'file_status_hidden' : 'file_status_visible'; ?>">
 
-									<?php
-										$status_hidden	= __('Hidden','cftp_admin');
-										$status_visible	= __('Visible','cftp_admin');
-										$class			= (!empty($uploaded['hidden'])) ? 'danger' : 'success';
-									?>
-									<span class="label label-<?php echo $class; ?>">
-										<?php echo ( !empty( $hidden ) && $hidden == 1) ? $status_hidden : $status_visible; ?>
-									</span>
-								</td>
+							<?php
+								$status_hidden	= __('Hidden','cftp_admin');
+								$status_visible	= __('Visible','cftp_admin');
+								$class			= (!empty($uploaded['hidden'])) ? 'danger' : 'success';
+							?>
+							<span class="label label-<?php echo $class; ?>">
+								<?php echo ( !empty( $hidden ) && $hidden == 1) ? $status_hidden : $status_visible; ?>
+							</span>
+						</td>
+						<?php
+							if ($current_level != 0) {
+						?>
+
 								<td>
 									<?php $class = ($uploaded['assignations'] > 0) ? 'success' : 'danger'; ?>
 									<span class="label label-<?php echo $class; ?>">
 										<?php echo $uploaded['assignations']; ?>
 									</span>
 								</td>
+						<?php
+							}
+						?>
 								<td class="col_visibility">
 									<?php
 										if ($uploaded['public'] == '1') {
@@ -348,9 +359,6 @@ while( $row = $statement->fetch() ) {
 									?>
 											</a>
 								</td>
-						<?php
-							}
-						?>
 						<td>
 							<a href="edit-file.php?file_id=<?php echo html_output($uploaded['new_file_id']); ?>" class="btn-primary btn btn-sm"><?php _e('Edit file','cftp_admin'); ?></a>
 							<?php
@@ -468,7 +476,7 @@ while( $row = $statement->fetch() ) {
 									<div class="row edit_files">
 										<div class="col-sm-12">
 											<div class="row edit_files_blocks">
-												<div class="<?php echo ($global_level != 0 || CLIENTS_CAN_SET_EXPIRATION_DATE == '1' ) ? 'col-sm-6 col-md-3' : 'col-sm-12 col-md-12'; ?> column">
+												<div class="col-sm-6 col-md-3 column">
 													<div class="file_data">
 														<div class="row">
 															<div class="col-sm-12">
@@ -508,7 +516,7 @@ while( $row = $statement->fetch() ) {
 															<div class="form-group">
 																<label for="file[<?php echo $i; ?>][expires_date]"><?php _e('Select a date', 'cftp_admin');?></label>
 																	<div class="input-group date-container">
-																		<input type="text" class="date-field form-control datapick-field" readonly id="file[<?php echo $i; ?>][expiry_date]" name="file[<?php echo $i; ?>][expiry_date]" value="<?php echo (!empty($expiry_date)) ? $expiry_date : date('d-m-Y'); ?>" />
+																		<input type="text" class="date-field form-control datapick-field" readonly id="file[<?php echo $i; ?>][expiry_date]" name="file[<?php echo $i; ?>][expiry_date]" value="<?php echo (!empty($expiry_date)) ? $expiry_date : date("Y-m-d",strtotime("+1 years")); ?>" />
 																		<div class="input-group-addon">
 																			<i class="glyphicon glyphicon-time"></i>
 																		</div>
@@ -517,13 +525,13 @@ while( $row = $statement->fetch() ) {
 
 															<div class="checkbox">
 																<label for="exp_checkbox_<?php echo $i; ?>">
-																	<input type="checkbox" name="file[<?php echo $i; ?>][expires]" id="exp_checkbox_<?php echo $i; ?>" value="1" <?php if ($row['expiry_set']) { ?>checked="checked"<?php } ?> /> <?php _e('File expires', 'cftp_admin');?>
+																	<input type="checkbox" name="file[<?php echo $i; ?>][expires]" id="exp_checkbox_<?php echo $i; ?>" value="1" checked="checked" /> <?php _e('File expires', 'cftp_admin');?>
 																</label>
 															</div>
 			
 															<?php
 																/** The following options are available to users only */
-																if ($global_level != 0) {
+																if (1) {
 															?>
 			
 																<div class="divider"></div>
@@ -532,7 +540,7 @@ while( $row = $statement->fetch() ) {
 																
 																<div class="checkbox">
 																	<label for="pub_checkbox_<?php echo $i; ?>">
-																		<input type="checkbox" id="pub_checkbox_<?php echo $i; ?>" name="file[<?php echo $i; ?>][public]" value="1" /> <?php _e('Allow public downloading of this file.', 'cftp_admin');?>
+																		<input type="checkbox" id="pub_checkbox_<?php echo $i; ?>" name="file[<?php echo $i; ?>][public]" value="1" checked="checked"/> <?php _e('Allow public downloading of this file.', 'cftp_admin');?>
 																	</label>
 																</div>
 														<?php

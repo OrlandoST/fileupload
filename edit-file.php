@@ -268,7 +268,6 @@ $current_level = get_current_user_level();
 						/**
 						 * 1- Add the file to the database
 						 */
-						 var_dump($add_arguments);
 						$process_file = $this_upload->upload_add_to_database($add_arguments);
 						if($process_file['database'] == true) {
 							$add_arguments['new_file_id'] = $process_file['new_file_id'];
