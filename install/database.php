@@ -26,6 +26,7 @@ if (defined('TRY_INSTALL')) {
 								  `expiry_date` TIMESTAMP NOT NULL DEFAULT \'0000-00-00 00:00:00\',
 								  `public_allow` INT(1) NOT NULL default \'0\',
 								  `public_token` varchar(32) NULL,
+								  `size` INT NOT NULL DEFAULT 0 COMMENT "file size",
 								  PRIMARY KEY (`id`)
 								) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 								',
