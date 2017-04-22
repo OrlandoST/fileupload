@@ -521,12 +521,13 @@ function default_footer_info($logged = true)
 		$add_user_data_user = $data['user'];
 	}
 	
-	$sql_distinct_files = $dbh->prepare("SELECT SUM(size) AS volume FROM " . TABLE_FILES);
+	$sql_distinct_files = $dbh->prepare("SELECT * FROM " . TABLE_OPTIONS." WHERE name=:name");
+	$sql_distinct_files->bindParam(':name', 'download_filesize');
 	$sql_distinct_files->execute();
 	$sql_distinct_files->setFetchMode(PDO::FETCH_ASSOC);
 	$file_size = 0;		
 	while( $data_file_relations = $sql_distinct_files->fetch() ) {
-		$file_size = $data_file_relations['volume'] * 1024;
+		$file_size = $data_file_relations['value'] * 1024;
 	}
 	$file_size = format_file_size($file_size);
 					

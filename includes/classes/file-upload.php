@@ -163,7 +163,7 @@ class PSend_Upload_File
 		}
 		if (isset($arguments['add_to_db'])) {
 			$this->statement = $this->dbh->prepare("INSERT INTO " . TABLE_FILES . " (url, filename, description, uploader, expires, expiry_date, public_allow, public_token, size)"
-											."VALUES (:url, :name, :description, :uploader, :expires, :expiry_date, :public, :token, :size)");
+											."VALUES (:url, :name, :description, :uploader, :expires, :expiry_date, :public, :token)");
 			$this->statement->bindParam(':url', $this->post_file);
 			$this->statement->bindParam(':name', $this->name);
 			$this->statement->bindParam(':description', $this->description);
@@ -172,13 +172,26 @@ class PSend_Upload_File
 			$this->statement->bindParam(':expiry_date', $this->expiry_date);
 			$this->statement->bindParam(':public', $this->is_public, PDO::PARAM_INT);
 			$this->statement->bindParam(':token', $this->public_token);
-			$this->statement->bindParam(':size', $this->size);
 			$this->statement->execute();
 
 			$this->file_id = $this->dbh->lastInsertId();
 			$this->state['new_file_id'] = $this->file_id;
 
 			$this->state['public_token'] = $this->public_token;
+			$sql_distinct_files = $dbh->prepare("SELECT * FROM " . TABLE_OPTIONS." WHERE name=:name");
+			$sql_distinct_files->bindParam(':name', 'download_filesize');
+			$sql_distinct_files->execute();
+			$sql_distinct_files->setFetchMode(PDO::FETCH_ASSOC);
+			$file_size = 0;		
+			while( $data_file_relations = $sql_distinct_files->fetch() ) {
+				$file_size = $data_file_relations['value'];
+			}
+			$file_size += $this->size;
+			$sql_distinct_files = $dbh->prepare("UPDATE " . TABLE_OPTIONS." SET value = :value WHERE name=:name");
+			$sql_distinct_files->bindParam(':name', 'download_filesize');
+			$sql_distinct_files->bindParam(':value', $file_size);
+			$sql_distinct_files->execute();
+
 
 			/** Record the action log */
 			if ($this->uploader_type == 'user') {
